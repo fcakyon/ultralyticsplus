@@ -1,5 +1,5 @@
-# yolov8tohuggingface
-Huggingface utilities for Ultralytics/YOLOv8
+# YOLOv8 to 🤗
+HuggingFace utilities for Ultralytics/YOLOv8
 
 ## installation
 
