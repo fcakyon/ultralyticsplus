@@ -32,11 +32,12 @@ datasets:
 tags:
 - yolov8tohf
 - yolov8
+- ultralytics
 - yolo
 - vision
 - {task}
 - pytorch
-library_name: yolov8
+library_name: ultralytics
 library_version: {ultralytics_version}
 inference: false
 {datasets_str_1}
@@ -64,10 +65,10 @@ model-index:
 
 ### How to use
 
-- Install `yolov8` and `yolov8tohf`:
+- Install `ultralytics` and `yolov8tohf`:
 
 ```bash
-pip install -U yolov8 yolov8tohf
+pip install -U ultralytics yolov8tohf
 ```
 
 - Load model and perform prediction:
