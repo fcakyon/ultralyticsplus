@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 def generate_model_usage_markdown(
     repo_id, ap50, task="object-detection", input_size=640, dataset_id=None, labels=None
 ):
-    from ultralytics import __version__ as ultralytics_version
+    from ultralyticsplus import __version__ as ultralyticsplus_version
 
     if dataset_id is not None:
         datasets_str_1 = f"""
@@ -30,15 +30,15 @@ datasets:
     return f""" 
 ---
 tags:
-- yolov8tohf
+- ultralyticsplus
 - yolov8
 - ultralytics
 - yolo
 - vision
 - {task}
 - pytorch
-library_name: ultralytics
-library_version: {ultralytics_version}
+library_name: ultralyticsplus
+library_version: {ultralyticsplus_version}
 inference: false
 {datasets_str_1}
 model-index:
@@ -65,16 +65,16 @@ model-index:
 
 ### How to use
 
-- Install `ultralytics` and `yolov8tohf`:
+- Install [ultralytics](https://github.com/ultralytics/ultralytics) and [ultralyticsplus](https://github.com/fcakyon/ultralyticsplus):
 
 ```bash
-pip install -U ultralytics yolov8tohf
+pip install -U ultralytics ultralyticsplus
 ```
 
 - Load model and perform prediction:
 
 ```python
-from yolov8tohf import YOLO
+from ultralyticsplus import YOLO, render_predictions
 
 # load model
 model = YOLO('{repo_id}')
@@ -89,7 +89,10 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image
 img = 'https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg'
 
 # perform inference
-model.predict(img, imgsz={input_size})
+for result in model.predict(img, imgsz=640, return_outputs=True):
+    print(result) # [x1, y1, x2, y2, conf, class]
+    render = render_predictions(model, img=img, det=result["det"])
+    render.show()
 ```
 
 """
@@ -312,7 +315,7 @@ def push_to_hfhub(
     )
 
 
-def donwload_from_hub(hf_model_id, hf_token=None):
+def download_from_hub(hf_model_id, hf_token=None):
     from huggingface_hub import hf_hub_download, list_repo_files
 
     repo_files = list_repo_files(repo_id=hf_model_id, repo_type="model", token=hf_token)
