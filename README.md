@@ -1,4 +1,4 @@
-# YOLOv8 to 🤗
+# ultralytics+
 
 All features from [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) plus many extra features.
 
