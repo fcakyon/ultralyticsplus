@@ -48,7 +48,7 @@ jobs:
               pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
           fi
           # pip install ultralyticsplu (production)
-          pip install .
+          pip install .[tests]
         shell: bash  # for Windows compatibility
 
       - name: Check environment

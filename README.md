@@ -1,6 +1,6 @@
 # ultralytics+
 
-All features from [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) plus many extra features.
+Extra features for [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics).
 
 ## installation
 
@@ -8,15 +8,13 @@ All features from [ultralytics/ultralytics](https://github.com/ultralytics/ultra
 pip install ultralyticsplus
 ```
 
-## extra features
-
-### push to hub
+## push to 🤗 hub
 
 ```bash
 ultralyticsplus --exp_dir runs/detect/train --hf_model_id HF_USERNAME/MODELNAME
 ```
 
-### load from hub
+## load from 🤗 hub
 
 ```python
 from ultralyticsplus import YOLO, render_predictions
