@@ -1,25 +1,26 @@
-# YOLOv8 to 🤗
-HuggingFace utilities for Ultralytics/YOLOv8
+# ultralytics+
+
+Extra features for [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics).
 
 ## installation
 
 ```bash
-pip install yolov8tohf
+pip install ultralyticsplus
 ```
 
-## push to hub
+## push to 🤗 hub
 
 ```bash
-yolov8tohf --exp_dir runs/detect/train --hf_model_id HF_USERNAME/MODELNAME
+ultralyticsplus --exp_dir runs/detect/train --hf_model_id HF_USERNAME/MODELNAME
 ```
 
-## load from hub
+## load from 🤗 hub
 
 ```python
-from yolov8tohf import YOLO
+from ultralyticsplus import YOLO, render_predictions
 
 # load model
-model = YOLO('fcakyon/yolov8s-test')
+model = YOLO('HF_USERNAME/MODELNAME')
 
 # set model parameters
 model.overrides['conf'] = 0.25  # NMS confidence threshold
@@ -31,5 +32,8 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image
 img = 'https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg'
 
 # perform inference
-model.predict(img, imgsz=640)
+for result in model.predict(img, imgsz=640, return_outputs=True):
+    print(result) # [x1, y1, x2, y2, conf, class]
+    render = render_predictions(model, img=img, det=result["det"])
+    render.show()
 ```

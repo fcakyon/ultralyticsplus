@@ -18,7 +18,7 @@ def get_requirements():
 
 def get_version():
     current_dir = os.path.abspath(os.path.dirname(__file__))
-    version_file = os.path.join(current_dir, "yolov8tohf", "__init__.py")
+    version_file = os.path.join(current_dir, "ultralyticsplus", "__init__.py")
     with io.open(version_file, encoding="utf-8") as f:
         return re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', f.read(), re.M).group(1)
 
@@ -31,15 +31,17 @@ _DEV_REQUIREMENTS = [
     "importlib-metadata>=1.1.0,<4.3;python_version<'3.8'",
 ]
 
-extras = {"tests": _DEV_REQUIREMENTS, "dev": _DEV_REQUIREMENTS}
+_TEST_REQUIREMENTS = ["pytest"]
+
+extras = {"tests": _TEST_REQUIREMENTS + _DEV_REQUIREMENTS, "dev": _DEV_REQUIREMENTS}
 
 
 setuptools.setup(
-    name="yolov8tohf",
+    name="ultralyticsplus",
     version=get_version(),
     author="",
     license="MIT",
-    description="Huggingface utilities for Ultralytics/YOLOv8.",
+    description="HuggingFace utilities for Ultralytics/YOLOv8.",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude=["tests"]),
@@ -61,7 +63,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "yolov8tohf=yolov8tohf.cli:app",
+            "ultralyticsplus=ultralyticsplus.cli:app",
         ],
     },
     keywords="machine-learning, deep-learning, ml, vision, yolov8, object-detection, huggingface, datasets",
