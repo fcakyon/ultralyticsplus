@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 import pandas as pd
+from PIL import Image
 
 from ultralyticsplus.file_utils import add_text_to_image
 
@@ -125,7 +126,7 @@ def generate_thumbnail(image_path, repo_id, task="object-detection"):
 
     image = add_text_to_image(
         text=thumbnail_text,
-        image_path=image_path,
+        pil_image=Image.open(image_path),
         brightness=0.60,
         text_font=65,
         crop_margin=None,
