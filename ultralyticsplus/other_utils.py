@@ -1,6 +1,3 @@
-from PIL import ImageDraw, ImageFont, ImageEnhance
-
-
 def add_text_to_image(
     text,
     pil_image,
