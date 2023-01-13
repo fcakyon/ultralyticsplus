@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from ultralyticsplus.file_utils import add_text_to_image
+from ultralyticsplus.other_utils import add_text_to_image
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 logging.basicConfig(level=LOGLEVEL)
