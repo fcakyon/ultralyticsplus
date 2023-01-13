@@ -38,6 +38,13 @@ def add_text_to_image(
     # Get the width and height of the text
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
+    
+    # update font size
+    text_font = int(860 / text_width * text_font)
+    font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
 
     # Define the coordinates of the smaller rounded rectangle
     box_margin = 20
