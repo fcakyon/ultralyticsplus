@@ -1,6 +1,8 @@
 import logging
 import os
 from pathlib import Path
+import pandas as pd
+from PIL import Image
 
 from ultralyticsplus.file_utils import add_text_to_image
 
@@ -54,7 +56,7 @@ model-index:
 ---
 
 <div align="center">
-  <img width="640" alt="{repo_id}" src="https://huggingface.co/{repo_id}/resolve/main/sample_visuals.jpg">
+  <img width="640" alt="{repo_id}" src="https://huggingface.co/{repo_id}/resolve/main/thumbnail.jpg">
 </div>
 
 ### Supported Labels
@@ -106,10 +108,10 @@ def generate_thumbnail(image_path, repo_id, task="object-detection"):
     """
     thumbnail_text = repo_id.split("/")[-1]
     texts = thumbnail_text.split("-")
-    for text in texts:
+    for ind, text in enumerate(texts):
         if "yolo" not in text.lower():
             text = text.title()
-        text.replace("yolo", "YOLO")
+        texts[ind] = text.replace("yolo", "YOLO")
 
     thumbnail_text = " ".join(texts)
 
@@ -124,7 +126,7 @@ def generate_thumbnail(image_path, repo_id, task="object-detection"):
 
     image = add_text_to_image(
         text=thumbnail_text,
-        image_path=image_path,
+        pil_image=Image.open(image_path),
         brightness=0.60,
         text_font=65,
         crop_margin=None,
@@ -162,7 +164,7 @@ def push_model_card_to_hfhub(
     thumbnail_path = generate_thumbnail(sample_visual_path, repo_id=repo_id, task=task)
     upload_file(
         repo_id=repo_id,
-        path_or_fileobj=thumbnail_path,
+        path_or_fileobj=str(thumbnail_path),
         path_in_repo="thumbnail.jpg",
         commit_message="upload sample visuals",
         token=hf_token,

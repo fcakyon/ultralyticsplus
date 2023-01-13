@@ -2,3 +2,4 @@ huggingface_hub
 fire
 ultralytics>=8.0.4
 sahi>=0.11.10
+pandas
