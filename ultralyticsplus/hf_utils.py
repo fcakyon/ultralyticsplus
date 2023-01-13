@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-import pandas as pd
+from ultralyticsplus.file_utils import add_text_to_image
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 logging.basicConfig(level=LOGLEVEL)
@@ -98,6 +98,45 @@ for result in model.predict(img, imgsz=640, return_outputs=True):
 """
 
 
+def generate_thumbnail(image_path, repo_id, task="object-detection"):
+    """
+    Generate thumbnail for the model card
+
+    USERNAME/yolov8n-garbage > YOLOv8 Garbage Detection
+    """
+    thumbnail_text = repo_id.split("/")[-1]
+    texts = thumbnail_text.split("-")
+    for text in texts:
+        if "yolo" not in text.lower():
+            text = text.title()
+        text.replace("yolo", "YOLO")
+
+    thumbnail_text = " ".join(texts)
+
+    if task == "object-detection":
+        thumbnail_text += " Detection"
+    elif task == "image-classification":
+        thumbnail_text += " Classification"
+    elif task == "instance-segmentation":
+        thumbnail_text += " Segmentation"
+    else:
+        raise ValueError(f"Task {task} is not supported.")
+
+    image = add_text_to_image(
+        text=thumbnail_text,
+        image_path=image_path,
+        brightness=0.60,
+        text_font=65,
+        crop_margin=None,
+    )
+
+    folder_path = Path(image_path).parent
+    thumbnail_path = folder_path / "thumbnail.jpg"
+    image.save(str(thumbnail_path), quality=100)
+
+    return thumbnail_path
+
+
 def push_model_card_to_hfhub(
     repo_id,
     exp_folder,
@@ -118,12 +157,13 @@ def push_model_card_to_hfhub(
         exist_ok=True,
     )
 
-    # upload sample visual to the repo
+    # upload thumbnail to the repo
     sample_visual_path = Path(exp_folder) / "val_batch0_labels.jpg"
+    thumbnail_path = generate_thumbnail(sample_visual_path, repo_id=repo_id, task=task)
     upload_file(
         repo_id=repo_id,
-        path_or_fileobj=str(sample_visual_path),
-        path_in_repo="sample_visuals.jpg",
+        path_or_fileobj=thumbnail_path,
+        path_in_repo="thumbnail.jpg",
         commit_message="upload sample visuals",
         token=hf_token,
         repo_type="model",
