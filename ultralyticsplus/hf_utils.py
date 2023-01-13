@@ -164,7 +164,7 @@ def push_model_card_to_hfhub(
     thumbnail_path = generate_thumbnail(sample_visual_path, repo_id=repo_id, task=task)
     upload_file(
         repo_id=repo_id,
-        path_or_fileobj=thumbnail_path,
+        path_or_fileobj=str(thumbnail_path),
         path_in_repo="thumbnail.jpg",
         commit_message="upload sample visuals",
         token=hf_token,
