@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+import pandas as pd
 
 from ultralyticsplus.file_utils import add_text_to_image
 
