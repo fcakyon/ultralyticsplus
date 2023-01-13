@@ -1,6 +1,3 @@
-from PIL import ImageDraw, ImageFont, ImageEnhance
-
-
 def add_text_to_image(
     text,
     pil_image,
@@ -8,6 +5,10 @@ def add_text_to_image(
     text_font: int = 50,
     crop_margin: int = None,
 ):
+    from PIL import ImageDraw, ImageFont, ImageEnhance
+
+    RESIZE_WIDTH_TO = 1280
+    MAX_TEXT_WIDTH = 860
 
     # Create an ImageEnhance object
     enhancer = ImageEnhance.Brightness(pil_image)
@@ -16,10 +17,10 @@ def add_text_to_image(
     pil_image = enhancer.enhance(brightness)
 
     # Resize the image
-    pil_image = pil_image.resize((1280, 1280))
+    pil_image = pil_image.resize((RESIZE_WIDTH_TO, RESIZE_WIDTH_TO))
 
+    # crop image
     if crop_margin is not None:
-        # crop image
         width, height = pil_image.size
         mid_height = int(height / 2)
         min_height = max(0, mid_height - crop_margin)
@@ -38,13 +39,14 @@ def add_text_to_image(
     # Get the width and height of the text
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
-    
+
     # update font size
-    text_font = int(860 / text_width * text_font)
-    font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    if text_width > MAX_TEXT_WIDTH:
+        text_font = int(MAX_TEXT_WIDTH / text_width * text_font)
+        font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
 
     # Define the coordinates of the smaller rounded rectangle
     box_margin = 20
