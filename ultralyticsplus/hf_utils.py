@@ -108,10 +108,10 @@ def generate_thumbnail(image_path, repo_id, task="object-detection"):
     """
     thumbnail_text = repo_id.split("/")[-1]
     texts = thumbnail_text.split("-")
-    for text in texts:
+    for ind, text in enumerate(texts):
         if "yolo" not in text.lower():
-            text = text.title()
-        text.replace("yolo", "YOLO")
+            texts[ind] = text.title()
+        texts[ind].replace("yolo", "YOLO")
 
     thumbnail_text = " ".join(texts)
 
