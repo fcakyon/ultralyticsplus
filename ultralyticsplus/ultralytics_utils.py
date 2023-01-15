@@ -86,7 +86,7 @@ def render_model_output(
     """
     if model.overrides["task"] not in ['detect', 'segment']:
         raise ValueError(
-            f"Model task must be either 'detect' or 'segment'. Got {model.overrides["task"]}"
+            f"Model task must be either 'detect' or 'segment'. Got {model.overrides['task']}"
         )
 
     image = read_image_as_pil(image)
