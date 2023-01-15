@@ -25,7 +25,7 @@ def test_inference():
     image = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
 
     # perform inference
-    for result in model.predict(img, imgsz=640, return_outputs=True):
+    for result in model.predict(image, imgsz=640, return_outputs=True):
         print(result)  # [x1, y1, x2, y2, conf, class]
         render = render_model_output(model, image=image, model_output=result)
         render.show()
@@ -38,7 +38,7 @@ def test_inference_generic():
     image = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
 
     # perform inference
-    for result in model.predict(img, imgsz=640, return_outputs=True):
+    for result in model.predict(image, imgsz=640, return_outputs=True):
         print(result)  # [x1, y1, x2, y2, conf, class]
         render = render_model_output(model, image=image, model_output=result)
         render.show()
