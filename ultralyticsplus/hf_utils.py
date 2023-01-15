@@ -33,7 +33,7 @@ def generate_model_usage_markdown(
         import_str = "from ultralyticsplus import YOLO, render_model_output"
         postprocess_str = """    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
     print(result["segment"]) # [segmentation mask]
-    render = render_model_output(model, image=image, model_output=result)
+    render = render_model_output(model=model, image=image, model_output=result)
     render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
@@ -49,7 +49,7 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
     elif hf_task == "object-detection":
         import_str = "from ultralyticsplus import YOLO, render_model_output"
         postprocess_str = """    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
-    render = render_model_output(model, image=image, model_output=result)
+    render = render_model_output(model=model, image=image, model_output=result)
     render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
