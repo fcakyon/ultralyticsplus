@@ -84,9 +84,9 @@ def render_model_output(
     Returns:
         Image.Image: Image with predictions
     """
-    if model.args.get("task") not in ['detect', 'segment']:
+    if model.overrides["task"] not in ['detect', 'segment']:
         raise ValueError(
-            f"Model task must be either 'detect' or 'segment'. Got {model.args.get('task')}"
+            f"Model task must be either 'detect' or 'segment'. Got {model.overrides["task"]}"
         )
 
     image = read_image_as_pil(image)
