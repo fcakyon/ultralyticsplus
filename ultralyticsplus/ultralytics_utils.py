@@ -1,10 +1,10 @@
 import logging
 import os
 from pathlib import Path
-from typing import Union
 from ultralytics import YOLO as YOLOBase
 from ultralytics.nn.tasks import attempt_load_one_weight
-from ultralytics.yolo.utils.plotting import colors, Annotator
+from sahi.prediction import ObjectPrediction, PredictionScore
+from sahi.utils.cv import visualize_object_predictions
 
 import numpy as np
 from PIL import Image
@@ -69,59 +69,77 @@ class YOLO(YOLOBase):
         ) = self._guess_ops_from_task(self.task)
 
 
-def render_predictions(
-    model: YOLO, img: Union[np.ndarray, str], det: list
+def render_model_output(
+    image, model: YOLO, model_output: dict
 ) -> Image.Image:
     """
     Renders predictions on the image
 
     Args:
+        image (str, URL, Image.Image): image to be rendered
         model (YOLO): YOLO model
-        img (Union[np.ndarray, str]): original image. RGB image or path to image.
-        det (dict): predictions. Should be in the format of
-            [x1, y1, x2, y2, conf, class]
+        model_output: output of the model. This is the output of the model.predict() method.
+            It is a dictionary with keys "det" and "segment".
 
     Returns:
         Image.Image: Image with predictions
     """
-    img = read_image_as_pil(img)
-    img = np.ascontiguousarray(img)
-    annotator = Annotator(
-        im=img,
-        line_width=model.overrides["line_thickness"],
-        example=str(model.model.names),
+    if model.overrides["task"] not in ['detect', 'segment']:
+        raise ValueError(
+            f"Model task must be either 'detect' or 'segment'. Got {model.overrides['task']}"
+        )
+
+    image = read_image_as_pil(image)
+    np_image = np.ascontiguousarray(image)
+
+    names = model.model.names
+
+    det = model_output.get("det", None)
+    segment = model_output.get("segment", None)
+
+    object_predictions = []
+    if det is not None:
+        det_ind = 0
+        for *xyxy, conf, cls in det:
+            if segment:
+                segmentation = [segment[det_ind].ravel().tolist()]
+                object_prediction = ObjectPrediction.from_coco_segmentation(
+                    segmentation=segmentation,
+                    category_name=names[int(cls)],
+                    category_id=int(cls),
+                    full_shape=[np_image.shape[1], np_image.shape[0]]
+                )
+                object_prediction.score = PredictionScore(value=conf)
+            else:
+                object_prediction = ObjectPrediction(
+                    bbox=xyxy,
+                    category_name=names[int(cls)],
+                    category_id=int(cls),
+                    score=conf
+                )
+            object_predictions.append(object_prediction)
+            det_ind += 1
+
+    result = visualize_object_predictions(
+        image=np_image,
+        object_prediction_list=object_predictions,
     )
 
-    # render results
-    for *xyxy, conf, cls in reversed(det):
-        c = int(cls)  # integer class
-        label = (
-            None
-            if model.overrides["hide_labels"]
-            else (
-                model.names[c]
-                if model.overrides["hide_conf"]
-                else f"{model.model.names[c]} {conf:.2f}"
-            )
-        )
-        annotator.box_label(xyxy, label, color=colors(c, True))
-
-    image = Image.fromarray(annotator.result())
-    return image
+    return Image.fromarray(result['image'])
 
 
-if __name__ == "__main__":
-    hf_model_id = "fcakyon/yolov8s-test"
-    hf_token = "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"
+def postprocess_classify_output(model: YOLO, prob: np.ndarray) -> dict:
+    """
+    Postprocesses the output of classification models
 
-    model = YOLO(hf_model_id, hf_token=hf_token)
+    Args:
+        model (YOLO): YOLO model
+        prob (np.ndarray): output of the model
 
-    img = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
-
-    visuals = []  # store visualizations
-    for result in model.predict(img, return_outputs=True, conf=0.5):
-        print(result)
-        visual = render_predictions(model, img=img, det=result["det"])
-        visuals.append(visual)
-
-    visuals[0].show()
+    Returns:
+        dict: dictionary of outputs with labels
+    """
+    output = {}
+    for i, label in enumerate(model.model.names.values()):
+        output[label] = prob[i].item()
+    return output
