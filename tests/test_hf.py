@@ -1,4 +1,4 @@
-from ultralyticsplus import YOLO, render_predictions, download_from_hub
+from ultralyticsplus import YOLO, render_model_output, download_from_hub
 
 hub_id = "ultralyticsplus/yolov8s"
 hub_id_generic = "kadirnar/yolov8n-v8.0"
@@ -22,12 +22,12 @@ def test_inference():
     model = YOLO(hub_id)
 
     # set image
-    img = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
+    image = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
 
     # perform inference
     for result in model.predict(img, imgsz=640, return_outputs=True):
         print(result)  # [x1, y1, x2, y2, conf, class]
-        render = render_predictions(model, img=img, det=result["det"])
+        render = render_model_output(model, image=image, model_output=result)
         render.show()
 
 
@@ -35,10 +35,10 @@ def test_inference_generic():
     model = YOLO(hub_id_generic)
 
     # set image
-    img = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
+    image = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
 
     # perform inference
     for result in model.predict(img, imgsz=640, return_outputs=True):
         print(result)  # [x1, y1, x2, y2, conf, class]
-        render = render_predictions(model, img=img, det=result["det"])
+        render = render_model_output(model, image=image, model_output=result)
         render.show()
