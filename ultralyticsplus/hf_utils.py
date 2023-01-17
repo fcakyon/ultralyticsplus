@@ -121,10 +121,10 @@ model-index:
 
 ### How to use
 
-- Install [ultralytics](https://github.com/ultralytics/ultralytics) and [ultralyticsplus](https://github.com/fcakyon/ultralyticsplus):
+- Install [ultralyticsplus](https://github.com/fcakyon/ultralyticsplus):
 
 ```bash
-pip install -U ultralytics ultralyticsplus
+pip install -U ultralyticsplus
 ```
 
 - Load model and perform prediction:
