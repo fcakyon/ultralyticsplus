@@ -1,4 +1,4 @@
-from .hf_utils import push_to_hfhub, download_from_hub
-from .ultralytics_utils import YOLO, render_model_output, postprocess_classify_output
+from .hf_utils import download_from_hub, push_to_hfhub
+from .ultralytics_utils import YOLO, postprocess_classify_output, render_result
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"

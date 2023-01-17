@@ -1,5 +1,5 @@
 huggingface_hub
 fire
-ultralytics>=8.0.4,<8.0.7
+ultralytics>=8.0.7,<8.0.8
 sahi>=0.11.11,<0.12.0
 pandas

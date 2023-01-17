@@ -2,11 +2,16 @@
 
 from pathlib import Path
 
-from ultralyticsplus import YOLO
+import cv2
+import torch
+from PIL import Image
+from ultralytics import YOLO
 from ultralytics.yolo.utils import ROOT, SETTINGS
+from sahi.utils.cv import read_image_as_pil
+import numpy as np
 
-MODEL = Path(SETTINGS["weights_dir"]) / "yolov8n.pt"
-CFG = "yolov8n.yaml"
+MODEL = Path(SETTINGS['weights_dir']) / 'yolov8n.pt'
+CFG = 'yolov8n.yaml'
 SOURCE = "https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/assets/bus.jpg"
 
 
@@ -30,20 +35,35 @@ def test_model_fuse():
     model.fuse()
 
 
+def test_predict_img():
+    model = YOLO(MODEL)
+    img = read_image_as_pil(SOURCE)
+    output = model(source=img, save=True, verbose=True)  # PIL
+    assert len(output) == 1, "predict test failed"
+    img = np.asarray(img)
+    output = model(source=img, save=True, save_txt=True)  # ndarray
+    assert len(output) == 1, "predict test failed"
+    output = model(source=[img, img], save=True, save_txt=True)  # batch
+    assert len(output) == 2, "predict test failed"
+    tens = torch.zeros(320, 640, 3)
+    output = model(tens.numpy())
+    assert len(output) == 1, "predict test failed"
+
+
 def test_val():
     model = YOLO(MODEL)
-    model.val(data="coco128.yaml", imgsz=32)
+    model.val(data="coco8.yaml", imgsz=32)
 
 
 def test_train_scratch():
     model = YOLO(CFG)
-    model.train(data="coco128.yaml", epochs=1, imgsz=32)
+    model.train(data="coco8.yaml", epochs=1, imgsz=32)
     model(SOURCE)
 
 
 def test_train_pretrained():
     model = YOLO(MODEL)
-    model.train(data="coco128.yaml", epochs=1, imgsz=32)
+    model.train(data="coco8.yaml", epochs=1, imgsz=32)
     model(SOURCE)
 
 
@@ -64,33 +84,44 @@ def test_export_torchscript():
     11           PaddlePaddle       paddle    _paddle_model   True   True
     """
     from ultralytics.yolo.engine.exporter import export_formats
-
     print(export_formats())
 
     model = YOLO(MODEL)
-    model.export(format="torchscript")
+    model.export(format='torchscript')
 
 
 def test_export_onnx():
     model = YOLO(MODEL)
-    model.export(format="onnx")
+    model.export(format='onnx')
 
 
 def test_export_openvino():
     model = YOLO(MODEL)
-    model.export(format="openvino")
+    model.export(format='openvino')
 
 
 def test_export_coreml():
     model = YOLO(MODEL)
-    model.export(format="coreml")
+    model.export(format='coreml')
 
 
 def test_export_paddle():
     model = YOLO(MODEL)
-    model.export(format="paddle")
+    model.export(format='paddle')
 
 
 def test_all_model_yamls():
-    for m in list((ROOT / "models").rglob("*.yaml")):
+    for m in list((ROOT / 'models').rglob('*.yaml')):
         YOLO(m.name)
+
+
+def test_workflow():
+    model = YOLO(MODEL)
+    model.train(data="coco8.yaml", epochs=1, imgsz=32)
+    model.val()
+    model.predict(SOURCE)
+    model.export(format="onnx", opset=12)  # export a model to ONNX format
+
+
+if __name__ == "__main__":
+    test_predict_img()
