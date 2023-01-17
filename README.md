@@ -17,7 +17,7 @@ ultralyticsplus --exp_dir runs/detect/train --hf_model_id HF_USERNAME/MODELNAME
 ## load from 🤗 hub
 
 ```python
-from ultralyticsplus import YOLO, render_model_output
+from ultralyticsplus import YOLO, render_result
 
 # load model
 model = YOLO('HF_USERNAME/MODELNAME')
@@ -32,8 +32,15 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image
 image = 'https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg'
 
 # perform inference
-for result in model.predict(image, imgsz=640, return_outputs=True):
-    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
-    render = render_model_output(model=model, image=image, model_output=result)
-    render.show()
+results = model.predict(image, imgsz=640):
+
+# parse results
+result = results[0]
+boxes = result.boxes.xyxy # x1, y1, x2, y2
+scores = result.boxes.conf
+categories = result.boxes.cls
+
+# show results on image
+render = render_result(result)
+render.show()
 ```
