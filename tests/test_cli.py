@@ -7,6 +7,7 @@ from ultralytics.yolo.utils import ROOT, SETTINGS
 
 MODEL = Path(SETTINGS['weights_dir']) / 'yolov8n'
 CFG = 'yolov8n'
+SOURCE = "https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/assets/bus.jpg"
 
 
 def run(cmd):
@@ -46,11 +47,11 @@ def test_val_classify():
 
 # Predict checks -------------------------------------------------------------------------------------------------------
 def test_predict_detect():
-    run(f"yolo mode=predict task=detect model={MODEL}.pt source={ROOT / 'assets'}")
+    run(f"yolo mode=predict task=detect model={MODEL}.pt source={SOURCE}")
 
 
 def test_predict_segment():
-    run(f"yolo mode=predict task=segment model={MODEL}-seg.pt source={ROOT / 'assets'}")
+    run(f"yolo mode=predict task=segment model={MODEL}-seg.pt source={SOURCE}")
 
 
 def test_predict_classify():
