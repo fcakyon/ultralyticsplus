@@ -7,6 +7,8 @@ import torch
 from PIL import Image
 from ultralytics import YOLO
 from ultralytics.yolo.utils import ROOT, SETTINGS
+from sahi.utils.cv import read_image_as_pil
+import numpy as np
 
 MODEL = Path(SETTINGS['weights_dir']) / 'yolov8n.pt'
 CFG = 'yolov8n.yaml'
@@ -35,10 +37,10 @@ def test_model_fuse():
 
 def test_predict_img():
     model = YOLO(MODEL)
-    img = Image.open(str(SOURCE))
+    img = read_image_as_pil(SOURCE)
     output = model(source=img, save=True, verbose=True)  # PIL
     assert len(output) == 1, "predict test failed"
-    img = cv2.imread(str(SOURCE))
+    img = np.asarray(img)
     output = model(source=img, save=True, save_txt=True)  # ndarray
     assert len(output) == 1, "predict test failed"
     output = model(source=[img, img], save=True, save_txt=True)  # batch
