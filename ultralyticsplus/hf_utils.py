@@ -77,7 +77,7 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
     if custom_tags:
         custom_tags_str = ''
         for ind, custom_tag in enumerate(custom_tags):
-            roboflow_tags_str += f"- {custom_tag}"
+            custom_tags_str += f"- {custom_tag}"
             if ind != len(custom_tags) - 1:
                 custom_tags_str += "\n"
 
@@ -470,6 +470,18 @@ def push_to_hfhub(
     thumbnail_text=None,
     custom_tags=None,
 ):
+    """
+    Pushes a ultralytics model to huggingface hub
+
+    Args:
+        exp_dir (str): ultralytics experiment folder path
+        hf_model_id (str): huggingface model id to be uploaded to
+        hf_token (str): huggingface write token
+        hf_private (bool): whether to make the repo private or not
+        hf_dataset_id (str): huggingface dataset id to be used for model card
+        thumbnail_text (str): text to be used in thumbnail
+        custom_tags (list): list of custom tags to be used for model card
+    """
     from ultralytics import YOLO
 
     best_weight_path = Path(exp_dir) / "weights" / "best.pt"
@@ -521,6 +533,16 @@ def push_to_hfhub(
 
 
 def download_from_hub(hf_model_id, hf_token=None):
+    """
+    Downloads a model from huggingface hub
+
+    Args:
+        hf_model_id (str): huggingface model id to be downloaded from
+        hf_token (str): huggingface read token
+
+    Returns:
+        model_path (str): path to downloaded model
+    """
     from huggingface_hub import hf_hub_download, list_repo_files
 
     repo_files = list_repo_files(repo_id=hf_model_id, repo_type="model", token=hf_token)
