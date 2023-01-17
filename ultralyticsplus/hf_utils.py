@@ -33,10 +33,10 @@ def generate_model_usage_markdown(
 
     if hf_task == "image-segmentation":
         import_str = "from ultralyticsplus import YOLO, render_result"
-        postprocess_str = """    print(result.boxes)
-    print(result.masks)
-    render = render_result(model=model, image=image, result=result)
-    render.show()"""
+        postprocess_str = """print(results[0].boxes)
+print(results[0].masks)
+render = render_result(model=model, image=image, result=results[0])
+render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
 model.overrides['agnostic_nms'] = False  # NMS class-agnostic
@@ -50,9 +50,9 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
 
     elif hf_task == "object-detection":
         import_str = "from ultralyticsplus import YOLO, render_result"
-        postprocess_str = """    print(result.boxes)
-    render = render_result(model=model, image=image, result=result)
-    render.show()"""
+        postprocess_str = """print(results[0].boxes)
+render = render_result(model=model, image=image, result=results[0])
+render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
 model.overrides['agnostic_nms'] = False  # NMS class-agnostic
@@ -63,9 +63,9 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
 
     elif hf_task == "image-classification":
         import_str = "from ultralyticsplus import YOLO, postprocess_classify_output"
-        postprocess_str = """    print(result.probs) # [0.1, 0.2, 0.3, 0.4]
-    processed_result = postprocess_classify_output(model, result=result)
-    print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
+        postprocess_str = """print(results[0].probs) # [0.1, 0.2, 0.3, 0.4]
+processed_result = postprocess_classify_output(model, result=results[0])
+print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
         model_params_str = """model.overrides['conf'] = 0.25  # model confidence threshold"""
         metrics_str = f"""      - type: accuracy
         value: {score_top1_acc}  # min: 0.0 - max: 1.0
@@ -74,8 +74,8 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
         value: {score_top5_acc}  # min: 0.0 - max: 1.0
         name: top5 accuracy"""
 
+    custom_tags_str = ''
     if custom_tags:
-        custom_tags_str = ''
         for ind, custom_tag in enumerate(custom_tags):
             custom_tags_str += f"- {custom_tag}"
             if ind != len(custom_tags) - 1:
@@ -152,7 +152,9 @@ model = YOLO('{repo_id}')
 image = 'https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg'
 
 # perform inference
-for result in model.predict(image, return_outputs=True):
+results = model.predict(image)
+
+# observe results
 {postprocess_str}
 ```
 
