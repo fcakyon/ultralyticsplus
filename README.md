@@ -39,6 +39,8 @@ result = results[0]
 boxes = result.boxes.xyxy # x1, y1, x2, y2
 scores = result.boxes.conf
 categories = result.boxes.cls
+scores = result.probs # for classification models
+masks = result.masks # for segmentation models
 
 # show results on image
 render = render_result(result)
