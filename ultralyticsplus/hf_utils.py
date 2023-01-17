@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+
 import pandas as pd
 from PIL import Image
 from sahi.utils.cv import read_image_as_pil
@@ -22,6 +23,7 @@ def generate_model_usage_markdown(
     task="object-detection",
     dataset_id=None,
     labels=None,
+    custom_tags=None,
 ):
     from ultralytics import __version__ as ultralytics_version
 
@@ -30,10 +32,10 @@ def generate_model_usage_markdown(
     model_str = "yolo" + model_type
 
     if hf_task == "image-segmentation":
-        import_str = "from ultralyticsplus import YOLO, render_model_output"
-        postprocess_str = """    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
-    print(result["segment"]) # [segmentation mask]
-    render = render_model_output(model=model, image=image, model_output=result)
+        import_str = "from ultralyticsplus import YOLO, render_result"
+        postprocess_str = """    print(result.boxes)
+    print(result.masks)
+    render = render_result(model=model, image=image, result=result)
     render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
@@ -47,9 +49,9 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
         name: mAP@0.5(mask)"""
 
     elif hf_task == "object-detection":
-        import_str = "from ultralyticsplus import YOLO, render_model_output"
-        postprocess_str = """    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
-    render = render_model_output(model=model, image=image, model_output=result)
+        import_str = "from ultralyticsplus import YOLO, render_result"
+        postprocess_str = """    print(result.boxes)
+    render = render_result(model=model, image=image, result=result)
     render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
@@ -61,8 +63,8 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
 
     elif hf_task == "image-classification":
         import_str = "from ultralyticsplus import YOLO, postprocess_classify_output"
-        postprocess_str = """    print(result["prob"]) # [0.1, 0.2, 0.3, 0.4]
-    processed_result = postprocess_classify_output(model, prob=result["prob"])
+        postprocess_str = """    print(result.probs) # [0.1, 0.2, 0.3, 0.4]
+    processed_result = postprocess_classify_output(model, result=result)
     print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
         model_params_str = """model.overrides['conf'] = 0.25  # model confidence threshold"""
         metrics_str = f"""      - type: accuracy
@@ -71,6 +73,13 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
       - type: accuracy
         value: {score_top5_acc}  # min: 0.0 - max: 1.0
         name: top5 accuracy"""
+
+    if custom_tags:
+        custom_tags_str = ''
+        for ind, custom_tag in enumerate(custom_tags):
+            roboflow_tags_str += f"- {custom_tag}"
+            if ind != len(custom_tags) - 1:
+                custom_tags_str += "\n"
 
     if dataset_id is not None:
         datasets_str_1 = f"""
@@ -95,6 +104,7 @@ tags:
 - vision
 - {hf_task}
 - pytorch
+{custom_tags_str}
 library_name: ultralytics
 library_version: {ultralytics_version}
 inference: false
@@ -217,8 +227,9 @@ def push_model_card_to_hfhub(
     score_top5_acc=None,
     model_type="v8",
     thumbnail_text=None,
+    custom_tags=None,
 ):
-    from huggingface_hub import upload_file, create_repo
+    from huggingface_hub import create_repo, upload_file
     from ultralytics import YOLO
 
     create_repo(
@@ -266,6 +277,7 @@ def push_model_card_to_hfhub(
         score_top5_acc=score_top5_acc,
         model_type=model_type,
         labels=labels,
+        custom_tags=custom_tags
     )
     modelcard_path = Path(exp_folder) / "README.md"
     with open(modelcard_path, "w") as file_object:
@@ -305,10 +317,12 @@ def push_config_to_hfhub(
         private (bool): Whether the model should be private or not
         model_type (str): The type of the model (default: v8)
     """
-    from huggingface_hub import upload_file, create_repo
     import json
-    from ultralyticsplus import __version__ as ultralyticsplus_version
+
+    from huggingface_hub import create_repo, upload_file
     from ultralytics import __version__ as ultralytics_version
+
+    from ultralyticsplus import __version__ as ultralyticsplus_version
 
     # create config
     config = {
@@ -358,8 +372,10 @@ def push_model_to_hfhub(repo_id, exp_folder, hf_token=None, private=False):
         hf_token (str): huggingface write token
         private (bool): whether to make the repo private or not
     """
-    from huggingface_hub import upload_file, create_repo, list_repo_files, delete_file
     from glob import glob
+
+    from huggingface_hub import (create_repo, delete_file, list_repo_files,
+                                 upload_file)
 
     best_model_path = Path(exp_folder) / "weights/best.pt"
 
@@ -408,6 +424,7 @@ def _push_to_hfhub(
     task="object-detection",
     model_type="v8",
     thumbnail_text=None,
+    custom_tags=None,
 ):
     LOGGER.info(f"Pushing to hf.co/{hf_model_id}")
 
@@ -437,6 +454,7 @@ def _push_to_hfhub(
         score_top5_acc=score_top5_acc,
         model_type=model_type,
         thumbnail_text=thumbnail_text,
+        custom_tags=custom_tags,
     )
     push_model_to_hfhub(
         repo_id=hf_model_id, exp_folder=save_dir, hf_token=hf_token, private=hf_private
@@ -450,6 +468,7 @@ def push_to_hfhub(
     hf_private=False,
     hf_dataset_id=None,
     thumbnail_text=None,
+    custom_tags=None,
 ):
     from ultralytics import YOLO
 
@@ -497,6 +516,7 @@ def push_to_hfhub(
         task=task,
         model_type=model.type,
         thumbnail_text=thumbnail_text,
+        custom_tags=custom_tags
     )
 
 
