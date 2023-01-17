@@ -76,6 +76,8 @@ print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
 
     custom_tags_str = ''
     if custom_tags:
+        if not isinstance(custom_tags, list):
+            custom_tags = [custom_tags]
         for ind, custom_tag in enumerate(custom_tags):
             custom_tags_str += f"- {custom_tag}"
             if ind != len(custom_tags) - 1:
