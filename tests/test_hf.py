@@ -66,6 +66,6 @@ def test_inference_generic():
     image = "https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg"
 
     # perform inference
-    result = model.predict(image, imgsz=640)
-    render = render_result(model=model, image=image, result=result)
+    results = model.predict(image, imgsz=640)
+    render = render_result(model=model, image=image, result=results[0])
     render.show()
