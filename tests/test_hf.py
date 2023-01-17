@@ -67,5 +67,5 @@ def test_inference_generic():
 
     # perform inference
     result = model.predict(image, imgsz=640)
-    render = render_result(model=model, image=image, model_output=result)
+    render = render_result(model=model, image=image, result=result)
     render.show()
