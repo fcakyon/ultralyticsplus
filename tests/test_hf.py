@@ -68,6 +68,9 @@ def run(cmd):
 
 def test_detection_upload():
     run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
+    hf_token = os.getenv('HF_TOKEN')
+    if hf_token is None:
+        raise ValueError('Please set HF_TOKEN environment variable to your HuggingFace token.')
     push_to_hfhub(
         hf_model_id="fcakyon/yolov8n-test",
         exp_dir='runs/detect/train',
