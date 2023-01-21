@@ -68,9 +68,12 @@ def run(cmd):
 
 def test_detection_upload():
     import platform
-    
+    from packaging.version import Version
+
     # run following lines if linux and python major == 3 and python minor == 10 (python micor can be anything)
-    if platform.system() == 'Linux' and platform.python_version_tuple()[0] == '3' and platform.python_version_tuple()[1] == '10':
+    print(f'platform.system(): {platform.system()}')
+    print(f'platform.python_version(): {platform.python_version()}')
+    if platform.system() == 'Linux' and Version(platform.python_version()) >= Version("3.10"):
         run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
         hf_token = os.getenv('HF_TOKEN')
         if hf_token is None:
