@@ -74,9 +74,8 @@ def test_detection_upload():
     print(f'platform.system(): {platform.system()}')
     print(f'platform.python_version(): {platform.python_version()}')
     print(f'os.getenv("RUNNER_OS"): {os.getenv("RUNNER_OS")}')
-    print(f'os.getenv("MATRIX_OS"): {os.getenv("MATRIX_OS")}')
     print(f'Version(platform.python_version()) >= Version("3.10"): {Version(platform.python_version()) >= Version("3.10")}')
-    if os.getenv('MATRIX_OS') == 'ubuntu-latest' and Version(platform.python_version()) >= Version("3.10"):
+    if platform.system() == 'Linux' and Version(platform.python_version()) >= Version("3.10"):
         run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
         hf_token = os.getenv('HF_TOKEN')
         if hf_token is None:
