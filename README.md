@@ -43,6 +43,6 @@ scores = result.probs # for classification models
 masks = result.masks # for segmentation models
 
 # show results on image
-render = render_result(result)
+render = render_result(model=model, image=image, result=result)
 render.show()
 ```

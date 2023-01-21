@@ -23,17 +23,19 @@ LOGGER = logging.getLogger(__name__)
 class YOLO(YOLOBase):
     def __init__(self, model="yolov8n.yaml", type="v8", hf_token=None) -> None:
         """
-        > Initializes the YOLO object.
+        Initializes the YOLO object.
 
         Args:
             model (str, Path): model to load or create
             type (str): Type/version of models to use. Defaults to "v8".
+            hf_token (str): huggingface token
         """
         self.type = type
         self.ModelClass = None  # model class
         self.TrainerClass = None  # trainer class
         self.ValidatorClass = None  # validator class
         self.PredictorClass = None  # predictor class
+        self.predictor = None  # reuse predictor
         self.model = None  # model object
         self.trainer = None  # trainer object
         self.task = None  # task type
@@ -64,12 +66,8 @@ class YOLO(YOLOBase):
         self.task = self.model.args["task"]
         self.overrides = self.model.args
         self._reset_ckpt_args(self.overrides)
-        (
-            self.ModelClass,
-            self.TrainerClass,
-            self.ValidatorClass,
-            self.PredictorClass,
-        ) = self._guess_ops_from_task(self.task)
+        self.ModelClass, self.TrainerClass, self.ValidatorClass, self.PredictorClass = \
+            self._guess_ops_from_task(self.task)
 
 
 def render_model_output_legacy(image, model: YOLO, model_output: dict) -> Image.Image:
