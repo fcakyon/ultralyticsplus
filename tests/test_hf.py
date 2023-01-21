@@ -3,7 +3,10 @@ from ultralyticsplus import (
     download_from_hub,
     postprocess_classify_output,
     render_result,
+    push_to_hfhub,
 )
+import subprocess
+import os
 
 hub_id = "ultralyticsplus/yolov8s"
 
@@ -56,3 +59,20 @@ def test_classification_inference():
     results = model(image, imgsz=640)
     name_to_probs = postprocess_classify_output(model=model, result=results[0])
     name_to_probs
+
+
+def run(cmd):
+    # Run a subprocess command with check=True
+    subprocess.run(cmd.split(), check=True)
+
+
+def test_detection_upload():
+    run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
+    push_to_hfhub(
+        hf_model_id="fcakyon/yolov8n-test",
+        exp_dir='runs/detect/train',
+        hf_token=os.getenv('HF_TOKEN'),
+        hf_private=True,
+        hf_dataset_id="fcakyon/football-detection",
+        thumbnail_text='YOLOv8s Football Detection'
+    )

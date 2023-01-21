@@ -508,14 +508,14 @@ def push_to_hfhub(
     score_top5_acc = None
     if task in ["object-detection", "instance-segmentation"]:
         # read the largest value in metrics/mAP50(B) column from csv file named results.csv
-        score_map50 = results_df["metrics/mAP50(B)"].max()
+        score_map50 = results_df["metrics/mAP50(B)"].max().item()
     if task == "instance-segmentation":
         # read the largest value in metrics/mAP50(B) metrics/mAP50(M) columns from csv file named results.csv
-        score_map50_mask = results_df["metrics/mAP50(M)"].max()
+        score_map50_mask = results_df["metrics/mAP50(M)"].max().item()
     if task == "image-classification":
         # read the largest value in metrics/accuracy_top1 metrics/accuracy_top5 columns from csv file named results.csv
-        score_top1_acc = results_df["metrics/accuracy_top1"].max()
-        score_top5_acc = results_df["metrics/accuracy_top5"].max()
+        score_top1_acc = results_df["metrics/accuracy_top1"].max().item()
+        score_top5_acc = results_df["metrics/accuracy_top5"].max().item()
 
     _push_to_hfhub(
         hf_model_id=hf_model_id,
