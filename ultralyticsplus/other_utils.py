@@ -1,11 +1,32 @@
+import os
+from PIL.ImageFont import FreeTypeFont
+
+FONT_URL = "https://github.com/fcakyon/ultralyticsplus/releases/download/0.0.16/OpenSans-Bold.ttf"
+
+
+def get_font(size: int) -> FreeTypeFont:
+    from PIL import ImageFont
+
+    try:
+        font = ImageFont.truetype("OpenSans-Bold.ttf", size)
+    except OSError:
+        from sahi.utils.file import download_from_url
+
+        package_dir = os.path.dirname(os.path.abspath(__file__))
+        font_path = os.path.join(package_dir, "OpenSans-Bold.ttf")
+        download_from_url(from_url=FONT_URL, to_path=font_path)
+        font = ImageFont.truetype(font_path, size)
+    return font
+
+
 def add_text_to_image(
     text,
     pil_image,
     brightness: float = 0.75,
-    text_font: int = 50,
+    text_font_size: int = 50,
     crop_margin: int = None,
 ):
-    from PIL import ImageDraw, ImageFont, ImageEnhance
+    from PIL import ImageDraw, ImageEnhance
 
     RESIZE_WIDTH_TO = 1280
     MAX_TEXT_WIDTH = 860
@@ -31,7 +52,7 @@ def add_text_to_image(
     draw = ImageDraw.Draw(pil_image)
 
     # Define the font and text to be written
-    font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
+    font = get_font(size=text_font_size)
 
     # Get the bounding box of the text
     bbox = draw.textbbox((0, 0), text, font=font)
@@ -42,8 +63,8 @@ def add_text_to_image(
 
     # update font size
     if text_width > MAX_TEXT_WIDTH:
-        text_font = int(MAX_TEXT_WIDTH / text_width * text_font)
-        font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
+        text_font_size = int(MAX_TEXT_WIDTH / text_width * text_font_size)
+        font = get_font(size=text_font_size)
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]

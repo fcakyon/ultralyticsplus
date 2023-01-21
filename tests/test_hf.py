@@ -3,7 +3,10 @@ from ultralyticsplus import (
     download_from_hub,
     postprocess_classify_output,
     render_result,
+    push_to_hfhub,
 )
+import subprocess
+import os
 
 hub_id = "ultralyticsplus/yolov8s"
 
@@ -56,3 +59,36 @@ def test_classification_inference():
     results = model(image, imgsz=640)
     name_to_probs = postprocess_classify_output(model=model, result=results[0])
     name_to_probs
+
+
+def run(cmd):
+    # Run a subprocess command with check=True
+    subprocess.run(cmd.split(), check=True)
+
+
+def test_detection_upload():
+    import platform
+    from packaging.version import Version
+
+    # run following lines if linux and python major == 3 and python minor == 10 (python micor can be anything)
+    print(f'platform.system(): {platform.system()}')
+    print(f'platform.python_version(): {platform.python_version()}')
+    print(f'os.getenv("RUNNER_OS"): {os.getenv("RUNNER_OS")}')
+    print(f'Version(platform.python_version()) >= Version("3.10"): {Version(platform.python_version()) >= Version("3.10")}')
+    if platform.system() == 'Linux' and Version(platform.python_version()) >= Version("3.10"):
+        print('training started')
+        run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
+        print('training ended')
+        hf_token = os.getenv('HF_TOKEN')
+        if hf_token is None:
+            raise ValueError('Please set HF_TOKEN environment variable to your HuggingFace token.')
+        print('push to hub started')
+        push_to_hfhub(
+            hf_model_id="fcakyon/yolov8n-test",
+            exp_dir='runs/detect/train',
+            hf_token=os.getenv('HF_TOKEN'),
+            hf_private=True,
+            hf_dataset_id="fcakyon/football-detection",
+            thumbnail_text='YOLOv8s Football Detection'
+        )
+        print('push to hub ended')
