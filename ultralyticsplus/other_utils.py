@@ -1,3 +1,7 @@
+import os
+
+FONT_URL = "https://github.com/fcakyon/ultralyticsplus/releases/download/0.0.16/OpenSans-Bold.ttf"
+
 def add_text_to_image(
     text,
     pil_image,
@@ -31,7 +35,15 @@ def add_text_to_image(
     draw = ImageDraw.Draw(pil_image)
 
     # Define the font and text to be written
-    font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
+    try:
+        font = ImageFont.truetype("OpenSans-Bold.ttf", text_font)
+    except OSError:
+        from sahi.utils.file import download_from_url
+
+        package_dir = os.path.dirname(os.path.abspath(__file__))
+        font_path = os.path.join(package_dir, "OpenSans-Bold.ttf")
+        download_from_url(from_url=FONT_URL, to_path=font_path)
+        font = ImageFont.truetype(font_path, text_font)
 
     # Get the bounding box of the text
     bbox = draw.textbbox((0, 0), text, font=font)
