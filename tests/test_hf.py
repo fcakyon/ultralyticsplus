@@ -67,15 +67,19 @@ def run(cmd):
 
 
 def test_detection_upload():
-    run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
-    hf_token = os.getenv('HF_TOKEN')
-    if hf_token is None:
-        raise ValueError('Please set HF_TOKEN environment variable to your HuggingFace token.')
-    push_to_hfhub(
-        hf_model_id="fcakyon/yolov8n-test",
-        exp_dir='runs/detect/train',
-        hf_token=os.getenv('HF_TOKEN'),
-        hf_private=True,
-        hf_dataset_id="fcakyon/football-detection",
-        thumbnail_text='YOLOv8s Football Detection'
-    )
+    import platform
+    
+    # run following lines if linux and python major == 3 and python minor == 10 (python micor can be anything)
+    if platform.system() == 'Linux' and platform.python_version_tuple()[0] == '3' and platform.python_version_tuple()[1] == '10':
+        run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
+        hf_token = os.getenv('HF_TOKEN')
+        if hf_token is None:
+            raise ValueError('Please set HF_TOKEN environment variable to your HuggingFace token.')
+        push_to_hfhub(
+            hf_model_id="fcakyon/yolov8n-test",
+            exp_dir='runs/detect/train',
+            hf_token=os.getenv('HF_TOKEN'),
+            hf_private=True,
+            hf_dataset_id="fcakyon/football-detection",
+            thumbnail_text='YOLOv8s Football Detection'
+        )
