@@ -204,7 +204,7 @@ def generate_thumbnail(
         text=thumbnail_text,
         pil_image=read_image_as_pil(image_path_or_url),
         brightness=0.60,
-        text_font=65,
+        text_font_size=65,
         crop_margin=None,
     )
 
