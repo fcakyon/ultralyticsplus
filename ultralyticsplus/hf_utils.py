@@ -3,9 +3,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from PIL import Image
 from sahi.utils.cv import read_image_as_pil
-
 from ultralyticsplus.other_utils import add_text_to_image
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
@@ -26,6 +24,7 @@ def generate_model_usage_markdown(
     custom_tags=None,
 ):
     from ultralytics import __version__ as ultralytics_version
+    from ultralyticsplus import __version__ as ultralyticsplus_version
 
     hf_task = "image-segmentation" if task == "instance-segmentation" else task
 
@@ -136,7 +135,7 @@ model-index:
 - Install [ultralyticsplus](https://github.com/fcakyon/ultralyticsplus):
 
 ```bash
-pip install -U ultralyticsplus
+pip install ultralyticsplus=={ultralyticsplus_version}
 ```
 
 - Load model and perform prediction:
