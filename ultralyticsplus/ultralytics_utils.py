@@ -166,7 +166,7 @@ def render_result(
             if masks:
                 img_height = np_image.shape[0]
                 img_width = np_image.shape[1]
-                segments = list(reversed(masks.segments))
+                segments = masks.segments
                 segments = segments[det_ind]  # segments: np.array([[x1, y1], [x2, y2]])
                 # convert segments into full shape
                 segments[:, 0] = segments[:, 0] * img_width
