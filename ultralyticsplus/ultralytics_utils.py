@@ -5,11 +5,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from sahi.prediction import ObjectPrediction, PredictionScore
-from sahi.utils.cv import (
-    get_bool_mask_from_coco_segmentation,
-    read_image_as_pil,
-    visualize_object_predictions,
-)
+from sahi.utils.cv import (get_bool_mask_from_coco_segmentation,
+                           read_image_as_pil, visualize_object_predictions)
 from ultralytics import YOLO as YOLOBase
 from ultralytics.nn.tasks import attempt_load_one_weight
 
@@ -67,69 +64,7 @@ class YOLO(YOLOBase):
         self.overrides = self.model.args
         self._reset_ckpt_args(self.overrides)
         self.ModelClass, self.TrainerClass, self.ValidatorClass, self.PredictorClass = \
-            self._guess_ops_from_task(self.task)
-
-
-def render_model_output_legacy(image, model: YOLO, model_output: dict) -> Image.Image:
-    """
-    Renders predictions on the image
-
-    Args:
-        image (str, URL, Image.Image): image to be rendered
-        model (YOLO): YOLO model
-        model_output: output of the model. This is the output of the model.predict() method.
-            It is a dictionary with keys "det" and "segment".
-
-    Returns:
-        Image.Image: Image with predictions
-    """
-    if model.overrides["task"] not in ["detect", "segment"]:
-        raise ValueError(
-            f"Model task must be either 'detect' or 'segment'. Got {model.overrides['task']}"
-        )
-
-    image = read_image_as_pil(image)
-    np_image = np.ascontiguousarray(image)
-
-    names = model.model.names
-
-    det = model_output.get("det", None)
-    segment = model_output.get("segment", None)
-
-    object_predictions = []
-    if det is not None:
-        det_ind = 0
-        for *xyxy, conf, cls in det:
-            if segment:
-                segmentation = [segment[det_ind].ravel().tolist()]
-                bool_mask = get_bool_mask_from_coco_segmentation(
-                    segmentation, width=np_image.shape[1], height=np_image.shape[0]
-                )
-                if sum(sum(bool_mask == 1)) == 0:
-                    continue
-                object_prediction = ObjectPrediction.from_coco_segmentation(
-                    segmentation=segmentation,
-                    category_name=names[int(cls)],
-                    category_id=int(cls),
-                    full_shape=[np_image.shape[0], np_image.shape[1]],
-                )
-                object_prediction.score = PredictionScore(value=conf)
-            else:
-                object_prediction = ObjectPrediction(
-                    bbox=xyxy,
-                    category_name=names[int(cls)],
-                    category_id=int(cls),
-                    score=conf,
-                )
-            object_predictions.append(object_prediction)
-            det_ind += 1
-
-    result = visualize_object_predictions(
-        image=np_image,
-        object_prediction_list=object_predictions,
-    )
-
-    return Image.fromarray(result["image"])
+            self._assign_ops_from_task(self.task)
 
 
 def render_result(
