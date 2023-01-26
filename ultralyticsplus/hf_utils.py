@@ -135,7 +135,7 @@ model-index:
 - Install [ultralyticsplus](https://github.com/fcakyon/ultralyticsplus):
 
 ```bash
-pip install ultralyticsplus=={ultralyticsplus_version}
+pip install ultralyticsplus=={ultralyticsplus_version} ultralytics=={ultralytics_version}
 ```
 
 - Load model and perform prediction:
