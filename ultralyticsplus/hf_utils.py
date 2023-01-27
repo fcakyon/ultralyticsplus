@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from sahi.utils.cv import read_image_as_pil
+
 from ultralyticsplus.other_utils import add_text_to_image
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
@@ -24,6 +25,7 @@ def generate_model_usage_markdown(
     custom_tags=None,
 ):
     from ultralytics import __version__ as ultralytics_version
+
     from ultralyticsplus import __version__ as ultralyticsplus_version
 
     hf_task = "image-segmentation" if task == "instance-segmentation" else task
@@ -472,6 +474,7 @@ def push_to_hfhub(
     hf_dataset_id=None,
     thumbnail_text=None,
     custom_tags=None,
+    return_dict=False,
 ):
     """
     Pushes a ultralytics model to huggingface hub
@@ -484,6 +487,7 @@ def push_to_hfhub(
         hf_dataset_id (str): huggingface dataset id to be used for model card
         thumbnail_text (str): text to be used in thumbnail
         custom_tags (list): list of custom tags to be used for model card
+        return_dict (bool): whether to return a dictionary of results or not
     """
     from ultralytics import YOLO
 
@@ -533,6 +537,17 @@ def push_to_hfhub(
         thumbnail_text=thumbnail_text,
         custom_tags=custom_tags
     )
+
+    if return_dict:
+        return {
+            'score_map50': score_map50,
+            'score_map50_mask': score_map50_mask,
+            'score_top1_acc': score_top1_acc,
+            'score_top5_acc': score_top5_acc,
+            'task': task,
+            'model_type': model.type,
+            'thumbnail_url': f"https://huggingface.co/{hf_model_id}/resolve/main/thumbnail.jpg"
+        }
 
 
 def download_from_hub(hf_model_id, hf_token=None):
