@@ -5,11 +5,14 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from sahi.prediction import ObjectPrediction, PredictionScore
-from sahi.utils.cv import (get_bool_mask_from_coco_segmentation,
-                           read_image_as_pil, visualize_object_predictions)
+from sahi.utils.cv import (
+    get_bool_mask_from_coco_segmentation,
+    read_image_as_pil,
+    visualize_object_predictions,
+)
 from ultralytics import YOLO as YOLOBase
-from ultralytics.nn.tasks import attempt_load_one_weight
-
+from ultralytics.nn.tasks import attempt_load_one_weight, guess_model_task
+from ultralytics.yolo.utils.downloads import GITHUB_ASSET_STEMS
 from ultralyticsplus.hf_utils import download_from_hub
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
@@ -42,10 +45,24 @@ class YOLO(YOLOBase):
         self.overrides = {}  # overrides for trainer object
 
         # Load or create new YOLO model
-        if Path(model).suffix not in (".pt", ".yaml"):
-            self._load_from_hf_hub(model, hf_token=hf_token)
-        else:
-            {".pt": self._load, ".yaml": self._new}[Path(model).suffix](model)
+        suffix = Path(model).suffix
+        if not suffix and Path(model).stem in GITHUB_ASSET_STEMS:
+            model, suffix = (
+                Path(model).with_suffix(".pt"),
+                ".pt",
+            )  # add suffix, i.e. yolov8n -> yolov8n.pt
+        try:
+            if Path(model).suffix not in (".pt", ".yaml"):
+                self._load_from_hf_hub(model, hf_token=hf_token)
+            elif suffix == ".yaml":
+                self._new(model)
+            else:
+                self._load(model)
+        except Exception as e:
+            raise NotImplementedError(
+                f"Unable to load model='{model}'. "
+                f"As an example try model='yolov8n.pt' or model='yolov8n.yaml'"
+            ) from e
 
     def _load_from_hf_hub(self, weights: str, hf_token=None):
         """
@@ -63,8 +80,12 @@ class YOLO(YOLOBase):
         self.task = self.model.args["task"]
         self.overrides = self.model.args
         self._reset_ckpt_args(self.overrides)
-        self.ModelClass, self.TrainerClass, self.ValidatorClass, self.PredictorClass = \
-            self._assign_ops_from_task(self.task)
+        (
+            self.ModelClass,
+            self.TrainerClass,
+            self.ValidatorClass,
+            self.PredictorClass,
+        ) = self._assign_ops_from_task()
 
 
 def render_result(
