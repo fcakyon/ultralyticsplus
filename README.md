@@ -32,7 +32,7 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image
 image = 'https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg'
 
 # perform inference
-results = model.predict(image, imgsz=640):
+results = model.predict(image, imgsz=640)
 
 # parse results
 result = results[0]
