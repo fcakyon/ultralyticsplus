@@ -67,7 +67,9 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
         postprocess_str = """print(results[0].probs) # [0.1, 0.2, 0.3, 0.4]
 processed_result = postprocess_classify_output(model, result=results[0])
 print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
-        model_params_str = """model.overrides['conf'] = 0.25  # model confidence threshold"""
+        model_params_str = (
+            """model.overrides['conf'] = 0.25  # model confidence threshold"""
+        )
         metrics_str = f"""      - type: accuracy
         value: {score_top1_acc}  # min: 0.0 - max: 1.0
         name: top1 accuracy
@@ -75,7 +77,7 @@ print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
         value: {score_top5_acc}  # min: 0.0 - max: 1.0
         name: top5 accuracy"""
 
-    custom_tags_str = ''
+    custom_tags_str = ""
     if custom_tags:
         if not isinstance(custom_tags, list):
             custom_tags = [custom_tags]
@@ -169,7 +171,7 @@ def generate_thumbnail(
     repo_id=None,
     task="object-detection",
     thumbnail_text=None,
-    export_dir=None
+    export_dir=None,
 ):
     """
     Generate thumbnail for the model card
@@ -248,7 +250,7 @@ def push_model_card_to_hfhub(
     if task in ["object-detection", "instance-segmentation"]:
         sample_visual_path = str(Path(exp_folder) / "val_batch0_labels.jpg")
     elif task == "image-classification":
-        sample_visual_path = 'https://user-images.githubusercontent.com/34196005/212529509-3723ef83-e184-4e57-af37-ed7cfe0faf11.jpg'
+        sample_visual_path = "https://user-images.githubusercontent.com/34196005/212529509-3723ef83-e184-4e57-af37-ed7cfe0faf11.jpg"
     else:
         raise ValueError(f"Task {task} is not supported.")
 
@@ -257,7 +259,7 @@ def push_model_card_to_hfhub(
         repo_id=repo_id,
         task=task,
         thumbnail_text=thumbnail_text,
-        export_dir=exp_folder
+        export_dir=exp_folder,
     )
     upload_file(
         repo_id=repo_id,
@@ -282,7 +284,7 @@ def push_model_card_to_hfhub(
         score_top5_acc=score_top5_acc,
         model_type=model_type,
         labels=labels,
-        custom_tags=custom_tags
+        custom_tags=custom_tags,
     )
     modelcard_path = Path(exp_folder) / "README.md"
     with open(modelcard_path, "w") as file_object:
@@ -308,7 +310,7 @@ def push_config_to_hfhub(
     task="object-detection",
     hf_token=None,
     private=False,
-    model_type="v8"
+    model_type="v8",
 ):
     """
     Pushes a yolov5 config to huggingface hub
@@ -379,8 +381,7 @@ def push_model_to_hfhub(repo_id, exp_folder, hf_token=None, private=False):
     """
     from glob import glob
 
-    from huggingface_hub import (create_repo, delete_file, list_repo_files,
-                                 upload_file)
+    from huggingface_hub import create_repo, delete_file, list_repo_files, upload_file
 
     best_model_path = Path(exp_folder) / "weights/best.pt"
 
@@ -444,7 +445,7 @@ def _push_to_hfhub(
         task=task,
         hf_token=hf_token,
         private=hf_private,
-        model_type=model_type
+        model_type=model_type,
     )
     push_model_card_to_hfhub(
         repo_id=hf_model_id,
@@ -535,18 +536,18 @@ def push_to_hfhub(
         task=task,
         model_type=model.type,
         thumbnail_text=thumbnail_text,
-        custom_tags=custom_tags
+        custom_tags=custom_tags,
     )
 
     if return_dict:
         return {
-            'score_map50': score_map50,
-            'score_map50_mask': score_map50_mask,
-            'score_top1_acc': score_top1_acc,
-            'score_top5_acc': score_top5_acc,
-            'task': task,
-            'model_type': model.type,
-            'thumbnail_url': f"https://huggingface.co/{hf_model_id}/resolve/main/thumbnail.jpg"
+            "score_map50": score_map50,
+            "score_map50_mask": score_map50_mask,
+            "score_top1_acc": score_top1_acc,
+            "score_top5_acc": score_top5_acc,
+            "task": task,
+            "model_type": model.type,
+            "thumbnail_url": f"https://huggingface.co/{hf_model_id}/resolve/main/thumbnail.jpg",
         }
 
 
