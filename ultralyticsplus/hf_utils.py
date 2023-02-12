@@ -1,8 +1,8 @@
 import logging
 import os
 from pathlib import Path
+
 import pandas as pd
-from PIL import Image
 from sahi.utils.cv import read_image_as_pil
 
 from ultralyticsplus.other_utils import add_text_to_image
@@ -22,19 +22,22 @@ def generate_model_usage_markdown(
     task="object-detection",
     dataset_id=None,
     labels=None,
+    custom_tags=None,
 ):
     from ultralytics import __version__ as ultralytics_version
+
+    from ultralyticsplus import __version__ as ultralyticsplus_version
 
     hf_task = "image-segmentation" if task == "instance-segmentation" else task
 
     model_str = "yolo" + model_type
 
     if hf_task == "image-segmentation":
-        import_str = "from ultralyticsplus import YOLO, render_model_output"
-        postprocess_str = """    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
-    print(result["segment"]) # [segmentation mask]
-    render = render_model_output(model=model, image=image, model_output=result)
-    render.show()"""
+        import_str = "from ultralyticsplus import YOLO, render_result"
+        postprocess_str = """print(results[0].boxes)
+print(results[0].masks)
+render = render_result(model=model, image=image, result=results[0])
+render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
 model.overrides['agnostic_nms'] = False  # NMS class-agnostic
@@ -47,10 +50,10 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
         name: mAP@0.5(mask)"""
 
     elif hf_task == "object-detection":
-        import_str = "from ultralyticsplus import YOLO, render_model_output"
-        postprocess_str = """    print(result["det"]) # [[x1, y1, x2, y2, conf, class]]
-    render = render_model_output(model=model, image=image, model_output=result)
-    render.show()"""
+        import_str = "from ultralyticsplus import YOLO, render_result"
+        postprocess_str = """print(results[0].boxes)
+render = render_result(model=model, image=image, result=results[0])
+render.show()"""
         model_params_str = """model.overrides['conf'] = 0.25  # NMS confidence threshold
 model.overrides['iou'] = 0.45  # NMS IoU threshold
 model.overrides['agnostic_nms'] = False  # NMS class-agnostic
@@ -61,16 +64,27 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image"""
 
     elif hf_task == "image-classification":
         import_str = "from ultralyticsplus import YOLO, postprocess_classify_output"
-        postprocess_str = """    print(result["prob"]) # [0.1, 0.2, 0.3, 0.4]
-    processed_result = postprocess_classify_output(model, prob=result["prob"])
-    print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
-        model_params_str = """model.overrides['conf'] = 0.25  # model confidence threshold"""
+        postprocess_str = """print(results[0].probs) # [0.1, 0.2, 0.3, 0.4]
+processed_result = postprocess_classify_output(model, result=results[0])
+print(processed_result) # {"cat": 0.4, "dog": 0.6}"""
+        model_params_str = (
+            """model.overrides['conf'] = 0.25  # model confidence threshold"""
+        )
         metrics_str = f"""      - type: accuracy
         value: {score_top1_acc}  # min: 0.0 - max: 1.0
         name: top1 accuracy
       - type: accuracy
         value: {score_top5_acc}  # min: 0.0 - max: 1.0
         name: top5 accuracy"""
+
+    custom_tags_str = ""
+    if custom_tags:
+        if not isinstance(custom_tags, list):
+            custom_tags = [custom_tags]
+        for ind, custom_tag in enumerate(custom_tags):
+            custom_tags_str += f"- {custom_tag}"
+            if ind != len(custom_tags) - 1:
+                custom_tags_str += "\n"
 
     if dataset_id is not None:
         datasets_str_1 = f"""
@@ -95,6 +109,7 @@ tags:
 - vision
 - {hf_task}
 - pytorch
+{custom_tags_str}
 library_name: ultralytics
 library_version: {ultralytics_version}
 inference: false
@@ -124,7 +139,7 @@ model-index:
 - Install [ultralyticsplus](https://github.com/fcakyon/ultralyticsplus):
 
 ```bash
-pip install -U ultralyticsplus
+pip install ultralyticsplus=={ultralyticsplus_version} ultralytics=={ultralytics_version}
 ```
 
 - Load model and perform prediction:
@@ -142,7 +157,9 @@ model = YOLO('{repo_id}')
 image = 'https://github.com/ultralytics/yolov5/raw/master/data/images/zidane.jpg'
 
 # perform inference
-for result in model.predict(image, return_outputs=True):
+results = model.predict(image)
+
+# observe results
 {postprocess_str}
 ```
 
@@ -154,7 +171,7 @@ def generate_thumbnail(
     repo_id=None,
     task="object-detection",
     thumbnail_text=None,
-    export_dir=None
+    export_dir=None,
 ):
     """
     Generate thumbnail for the model card
@@ -191,7 +208,7 @@ def generate_thumbnail(
         text=thumbnail_text,
         pil_image=read_image_as_pil(image_path_or_url),
         brightness=0.60,
-        text_font=65,
+        text_font_size=65,
         crop_margin=None,
     )
 
@@ -217,8 +234,9 @@ def push_model_card_to_hfhub(
     score_top5_acc=None,
     model_type="v8",
     thumbnail_text=None,
+    custom_tags=None,
 ):
-    from huggingface_hub import upload_file, create_repo
+    from huggingface_hub import create_repo, upload_file
     from ultralytics import YOLO
 
     create_repo(
@@ -232,7 +250,7 @@ def push_model_card_to_hfhub(
     if task in ["object-detection", "instance-segmentation"]:
         sample_visual_path = str(Path(exp_folder) / "val_batch0_labels.jpg")
     elif task == "image-classification":
-        sample_visual_path = 'https://user-images.githubusercontent.com/34196005/212529509-3723ef83-e184-4e57-af37-ed7cfe0faf11.jpg'
+        sample_visual_path = "https://user-images.githubusercontent.com/34196005/212529509-3723ef83-e184-4e57-af37-ed7cfe0faf11.jpg"
     else:
         raise ValueError(f"Task {task} is not supported.")
 
@@ -241,7 +259,7 @@ def push_model_card_to_hfhub(
         repo_id=repo_id,
         task=task,
         thumbnail_text=thumbnail_text,
-        export_dir=exp_folder
+        export_dir=exp_folder,
     )
     upload_file(
         repo_id=repo_id,
@@ -266,6 +284,7 @@ def push_model_card_to_hfhub(
         score_top5_acc=score_top5_acc,
         model_type=model_type,
         labels=labels,
+        custom_tags=custom_tags,
     )
     modelcard_path = Path(exp_folder) / "README.md"
     with open(modelcard_path, "w") as file_object:
@@ -291,7 +310,7 @@ def push_config_to_hfhub(
     task="object-detection",
     hf_token=None,
     private=False,
-    model_type="v8"
+    model_type="v8",
 ):
     """
     Pushes a yolov5 config to huggingface hub
@@ -305,10 +324,12 @@ def push_config_to_hfhub(
         private (bool): Whether the model should be private or not
         model_type (str): The type of the model (default: v8)
     """
-    from huggingface_hub import upload_file, create_repo
     import json
-    from ultralyticsplus import __version__ as ultralyticsplus_version
+
+    from huggingface_hub import create_repo, upload_file
     from ultralytics import __version__ as ultralytics_version
+
+    from ultralyticsplus import __version__ as ultralyticsplus_version
 
     # create config
     config = {
@@ -358,8 +379,9 @@ def push_model_to_hfhub(repo_id, exp_folder, hf_token=None, private=False):
         hf_token (str): huggingface write token
         private (bool): whether to make the repo private or not
     """
-    from huggingface_hub import upload_file, create_repo, list_repo_files, delete_file
     from glob import glob
+
+    from huggingface_hub import create_repo, delete_file, list_repo_files, upload_file
 
     best_model_path = Path(exp_folder) / "weights/best.pt"
 
@@ -408,6 +430,7 @@ def _push_to_hfhub(
     task="object-detection",
     model_type="v8",
     thumbnail_text=None,
+    custom_tags=None,
 ):
     LOGGER.info(f"Pushing to hf.co/{hf_model_id}")
 
@@ -422,7 +445,7 @@ def _push_to_hfhub(
         task=task,
         hf_token=hf_token,
         private=hf_private,
-        model_type=model_type
+        model_type=model_type,
     )
     push_model_card_to_hfhub(
         repo_id=hf_model_id,
@@ -437,6 +460,7 @@ def _push_to_hfhub(
         score_top5_acc=score_top5_acc,
         model_type=model_type,
         thumbnail_text=thumbnail_text,
+        custom_tags=custom_tags,
     )
     push_model_to_hfhub(
         repo_id=hf_model_id, exp_folder=save_dir, hf_token=hf_token, private=hf_private
@@ -450,7 +474,22 @@ def push_to_hfhub(
     hf_private=False,
     hf_dataset_id=None,
     thumbnail_text=None,
+    custom_tags=None,
+    return_dict=False,
 ):
+    """
+    Pushes a ultralytics model to huggingface hub
+
+    Args:
+        exp_dir (str): ultralytics experiment folder path
+        hf_model_id (str): huggingface model id to be uploaded to
+        hf_token (str): huggingface write token
+        hf_private (bool): whether to make the repo private or not
+        hf_dataset_id (str): huggingface dataset id to be used for model card
+        thumbnail_text (str): text to be used in thumbnail
+        custom_tags (list): list of custom tags to be used for model card
+        return_dict (bool): whether to return a dictionary of results or not
+    """
     from ultralytics import YOLO
 
     best_weight_path = Path(exp_dir) / "weights" / "best.pt"
@@ -474,14 +513,14 @@ def push_to_hfhub(
     score_top5_acc = None
     if task in ["object-detection", "instance-segmentation"]:
         # read the largest value in metrics/mAP50(B) column from csv file named results.csv
-        score_map50 = results_df["metrics/mAP50(B)"].max()
+        score_map50 = results_df["metrics/mAP50(B)"].max().item()
     if task == "instance-segmentation":
         # read the largest value in metrics/mAP50(B) metrics/mAP50(M) columns from csv file named results.csv
-        score_map50_mask = results_df["metrics/mAP50(M)"].max()
+        score_map50_mask = results_df["metrics/mAP50(M)"].max().item()
     if task == "image-classification":
         # read the largest value in metrics/accuracy_top1 metrics/accuracy_top5 columns from csv file named results.csv
-        score_top1_acc = results_df["metrics/accuracy_top1"].max()
-        score_top5_acc = results_df["metrics/accuracy_top5"].max()
+        score_top1_acc = results_df["metrics/accuracy_top1"].max().item()
+        score_top5_acc = results_df["metrics/accuracy_top5"].max().item()
 
     _push_to_hfhub(
         hf_model_id=hf_model_id,
@@ -497,10 +536,32 @@ def push_to_hfhub(
         task=task,
         model_type=model.type,
         thumbnail_text=thumbnail_text,
+        custom_tags=custom_tags,
     )
+
+    if return_dict:
+        return {
+            "score_map50": score_map50,
+            "score_map50_mask": score_map50_mask,
+            "score_top1_acc": score_top1_acc,
+            "score_top5_acc": score_top5_acc,
+            "task": task,
+            "model_type": model.type,
+            "thumbnail_url": f"https://huggingface.co/{hf_model_id}/resolve/main/thumbnail.jpg",
+        }
 
 
 def download_from_hub(hf_model_id, hf_token=None):
+    """
+    Downloads a model from huggingface hub
+
+    Args:
+        hf_model_id (str): huggingface model id to be downloaded from
+        hf_token (str): huggingface read token
+
+    Returns:
+        model_path (str): path to downloaded model
+    """
     from huggingface_hub import hf_hub_download, list_repo_files
 
     repo_files = list_repo_files(repo_id=hf_model_id, repo_type="model", token=hf_token)
