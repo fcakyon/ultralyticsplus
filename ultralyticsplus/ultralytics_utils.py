@@ -89,7 +89,11 @@ class YOLO(YOLOBase):
 
 
 def render_result(
-    image, model: YOLO, result: "ultralytics.yolo.engine.result.Result"
+    image, 
+    model: YOLO,
+    result: "ultralytics.yolo.engine.result.Result",
+    rect_th: int = 2,
+    text_th: int = 2,
 ) -> Image.Image:
     """
     Renders predictions on the image
@@ -112,8 +116,8 @@ def render_result(
 
     names = model.model.names
 
-    masks = result.masks
-    boxes = result.boxes
+    masks = result[0].masks
+    boxes = result[0].boxes
 
     object_predictions = []
     if boxes is not None:
@@ -154,6 +158,8 @@ def render_result(
     result = visualize_object_predictions(
         image=np_image,
         object_prediction_list=object_predictions,
+        rect_th=rect_th,
+        text_th=text_th,
     )
 
     return Image.fromarray(result["image"])
