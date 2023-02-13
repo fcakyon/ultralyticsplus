@@ -116,8 +116,8 @@ def render_result(
 
     names = model.model.names
 
-    masks = result[0].masks
-    boxes = result[0].boxes
+    masks = result.masks
+    boxes = result.boxes
 
     object_predictions = []
     if boxes is not None:
