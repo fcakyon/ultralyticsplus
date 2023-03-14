@@ -3,3 +3,4 @@ fire
 ultralytics>=8.0.43,<8.0.44
 sahi>=0.11.11,<0.12.0
 pandas
+roboflow>= 0.2.32
