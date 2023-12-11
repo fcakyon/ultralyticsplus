@@ -1,6 +1,7 @@
 huggingface_hub>=0.12.0
 fire
-ultralytics>=8.0.43,<8.0.44
+ultralytics>=8.0.225,<8.1.0
 sahi>=0.11.11,<0.12.0
 pandas
 roboflow>= 0.2.32
+protobuf>=3.20,<3.21

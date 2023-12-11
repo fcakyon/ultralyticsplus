@@ -6,7 +6,7 @@ import cv2
 import torch
 from PIL import Image
 from ultralytics import YOLO
-from ultralytics.yolo.utils import ROOT, SETTINGS
+from ultralytics.utils import ROOT, SETTINGS
 from sahi.utils.cv import read_image_as_pil
 import numpy as np
 
@@ -83,7 +83,7 @@ def test_export_torchscript():
     10          TensorFlow.js         tfjs       _web_model  False  False
     11           PaddlePaddle       paddle    _paddle_model   True   True
     """
-    from ultralytics.yolo.engine.exporter import export_formats
+    from ultralytics.engine.exporter import export_formats
     print(export_formats())
 
     model = YOLO(MODEL)

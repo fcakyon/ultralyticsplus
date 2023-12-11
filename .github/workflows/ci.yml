@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.8, 3.9, "3.10", "3.11"]
       fail-fast: false
 
     steps:
@@ -48,7 +48,7 @@ jobs:
               pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
           fi
           pip install .[tests]
-        shell: bash  # for Windows compatibility
+        shell: bash # for Windows compatibility
 
       - name: Check environment
         run: |
