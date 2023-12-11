@@ -534,7 +534,6 @@ def push_to_hfhub(
         score_top1_acc=score_top1_acc,
         score_top5_acc=score_top5_acc,
         task=task,
-        model_type=model.type,
         thumbnail_text=thumbnail_text,
         custom_tags=custom_tags,
     )

@@ -74,7 +74,7 @@ def test_detection_upload():
     # run following lines if linux and python major == 3 and python minor == 10 (python micor can be anything)
     if platform.system() == 'Linux' and Version(platform.python_version()) >= Version("3.10"):
         print('training started')
-        run('yolo train detect model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1')
+        run(f'yolo train detect exist_ok=True model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1 --name={os.getcwd()}/runs/detect/train')
         print('training ended')
         hf_token = os.getenv('HF_TOKEN')
         if hf_token is None:

@@ -12,7 +12,7 @@ from sahi.utils.cv import (
 )
 from ultralytics import YOLO as YOLOBase
 from ultralytics.nn.tasks import attempt_load_one_weight, guess_model_task
-from ultralytics.yolo.utils.downloads import GITHUB_ASSET_STEMS
+from ultralytics.utils.downloads import GITHUB_ASSETS_STEMS
 from ultralyticsplus.hf_utils import download_from_hub
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
@@ -43,10 +43,13 @@ class YOLO(YOLOBase):
         self.cfg = None  # if loaded from *.yaml
         self.ckpt_path = None
         self.overrides = {}  # overrides for trainer object
+        
+        # needed so torch can load models
+        super().__init__()
 
         # Load or create new YOLO model
         suffix = Path(model).suffix
-        if not suffix and Path(model).stem in GITHUB_ASSET_STEMS:
+        if not suffix and Path(model).stem in GITHUB_ASSETS_STEMS:
             model, suffix = (
                 Path(model).with_suffix(".pt"),
                 ".pt",
@@ -91,7 +94,7 @@ class YOLO(YOLOBase):
 def render_result(
     image, 
     model: YOLO,
-    result: "ultralytics.yolo.engine.result.Result",
+    result: "ultralytics.engine.result.Result",
     rect_th: int = 2,
     text_th: int = 2,
 ) -> Image.Image:
@@ -101,7 +104,7 @@ def render_result(
     Args:
         image (str, URL, Image.Image): image to be rendered
         model (YOLO): YOLO model
-        result (ultralytics.yolo.engine.result.Result): output of the model. This is the output of the model.predict() method.
+        result (ultralytics.engine.result.Result): output of the model. This is the output of the model.predict() method.
 
     Returns:
         Image.Image: Image with predictions
@@ -126,7 +129,7 @@ def render_result(
             if masks:
                 img_height = np_image.shape[0]
                 img_width = np_image.shape[1]
-                segments = masks.segments
+                segments = masks.xyn
                 segments = segments[det_ind]  # segments: np.array([[x1, y1], [x2, y2]])
                 # convert segments into full shape
                 segments[:, 0] = segments[:, 0] * img_width
@@ -166,7 +169,7 @@ def render_result(
 
 
 def postprocess_classify_output(
-    model: YOLO, result: "ultralytics.yolo.engine.result.Result"
+    model: YOLO, result: "ultralytics.engine.result.Result"
 ) -> dict:
     """
     Postprocesses the output of classification models
@@ -187,5 +190,5 @@ def postprocess_classify_output(
         raise ValueError("Model names must be either a list or a dict")
 
     for i, label in enumerate(names):
-        output[label] = result.probs[i].item()
+        output[label] = result.probs[i].top1
     return output
