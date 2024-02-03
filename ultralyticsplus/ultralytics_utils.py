@@ -10,8 +10,9 @@ from sahi.utils.cv import (
     read_image_as_pil,
     visualize_object_predictions,
 )
+import ultralytics
 from ultralytics import YOLO as YOLOBase
-from ultralytics.nn.tasks import attempt_load_one_weight, guess_model_task
+from ultralytics.nn.tasks import attempt_load_one_weight
 from ultralytics.utils.downloads import GITHUB_ASSETS_STEMS
 from ultralyticsplus.hf_utils import download_from_hub
 
@@ -43,7 +44,7 @@ class YOLO(YOLOBase):
         self.cfg = None  # if loaded from *.yaml
         self.ckpt_path = None
         self.overrides = {}  # overrides for trainer object
-        
+
         # needed so torch can load models
         super().__init__()
 
@@ -108,9 +109,9 @@ class YOLO(YOLOBase):
 
 
 def render_result(
-    image, 
+    image,
     model: YOLO,
-    result: "ultralytics.engine.result.Result",
+    result: ultralytics.engine.result.Result,
     rect_th: int = 2,
     text_th: int = 2,
 ) -> Image.Image:
@@ -185,7 +186,7 @@ def render_result(
 
 
 def postprocess_classify_output(
-    model: YOLO, result: "ultralytics.engine.result.Result"
+    model: YOLO, result: ultralytics.engine.result.Result
 ) -> dict:
     """
     Postprocesses the output of classification models

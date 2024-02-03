@@ -2,7 +2,7 @@ name: Package CI
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *" # Runs at 00:00 UTC every day
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
           else
               pip install ultralyticsplus[tests] --extra-index-url https://download.pytorch.org/whl/cpu
           fi
-        shell: bash  # for Windows compatibility
+        shell: bash # for Windows compatibility
 
       - name: Check environment
         run: |
