@@ -83,12 +83,28 @@ class YOLO(YOLOBase):
         self.task = self.model.args["task"]
         self.overrides = self.model.args
         self._reset_ckpt_args(self.overrides)
-        (
-            self.ModelClass,
-            self.TrainerClass,
-            self.ValidatorClass,
-            self.PredictorClass,
-        ) = self._assign_ops_from_task()
+
+        # for loading a model with ultralytics <8.0.44
+        if hasattr(self, "_assign_ops_from_task"):
+            (
+                self.ModelClass,
+                self.TrainerClass,
+                self.ValidatorClass,
+                self.PredictorClass,
+            ) = self._assign_ops_from_task()
+
+        # for loading a model with ultralytics >=8.0.44
+        else:
+            if self.task not in self.task_map:
+                raise ValueError(
+                    f"Task '{self.task}' not supported. Supported tasks: {list(self.task_map.keys())}"
+                )
+            (
+                self.ModelClass,
+                self.TrainerClass,
+                self.ValidatorClass,
+                self.PredictorClass,
+            ) = self.task_map[self.task]
 
 
 def render_result(

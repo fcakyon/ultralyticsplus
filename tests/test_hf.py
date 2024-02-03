@@ -11,8 +11,14 @@ import os
 hub_id = "ultralyticsplus/yolov8s"
 
 
+# for ultralytics < 8.0.44
 def test_load_from_hub():
     path = download_from_hub(hub_id)
+
+
+# for ultralytics >= 8.0.44
+def test_load_from_hub_yolo_8_0_44():
+    model = YOLO("keremberke/yolov8n-table-extraction")
 
 
 def test_yolo_from_hub():
