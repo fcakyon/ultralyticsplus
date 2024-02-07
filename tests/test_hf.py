@@ -22,7 +22,7 @@ def test_load_from_hub_yolo_8_0_44():
 
 
 def test_yolo_from_hub():
-    model = YOLO(hub_id)  # noqa F841
+    model = YOLO(hub_id)
 
     # set model parameters
     model.overrides["conf"] = 0.25  # NMS confidence threshold

@@ -10,7 +10,7 @@ from sahi.utils.cv import (
     read_image_as_pil,
     visualize_object_predictions,
 )
-import ultralytics
+from ultralytics.engine.results import Results
 from ultralytics import YOLO as YOLOBase
 from ultralytics.nn.tasks import attempt_load_one_weight
 from ultralytics.utils.downloads import GITHUB_ASSETS_STEMS
@@ -111,7 +111,7 @@ class YOLO(YOLOBase):
 def render_result(
     image,
     model: YOLO,
-    result: ultralytics.engine.result.Result,
+    result: Results,
     rect_th: int = 2,
     text_th: int = 2,
 ) -> Image.Image:
@@ -121,7 +121,7 @@ def render_result(
     Args:
         image (str, URL, Image.Image): image to be rendered
         model (YOLO): YOLO model
-        result (ultralytics.engine.result.Result): output of the model. This is the output of the model.predict() method.
+        result (Results): output of the model. This is the output of the model.predict() method.
 
     Returns:
         Image.Image: Image with predictions
@@ -185,15 +185,13 @@ def render_result(
     return Image.fromarray(result["image"])
 
 
-def postprocess_classify_output(
-    model: YOLO, result: ultralytics.engine.result.Result
-) -> dict:
+def postprocess_classify_output(model: YOLO, result: Results) -> dict:
     """
     Postprocesses the output of classification models
 
     Args:
         model (YOLO): YOLO model
-        prob (np.ndarray): output of the model
+        result (Results): output of the model. This is the output of the model.predict() method.
 
     Returns:
         dict: dictionary of outputs with labels
