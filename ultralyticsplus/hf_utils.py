@@ -99,7 +99,7 @@ datasets:
 """
     else:
         datasets_str_1 = datasets_str_2 = ""
-    return f""" 
+    return f"""
 ---
 tags:
 - ultralyticsplus
