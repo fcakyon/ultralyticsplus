@@ -6,8 +6,8 @@ from pathlib import Path
 from ultralytics.utils import SETTINGS
 
 
-MODEL = Path(SETTINGS['weights_dir']) / 'yolov8n'
-CFG = 'yolov8n'
+MODEL = Path(SETTINGS["weights_dir"]) / "yolov8n"
+CFG = "yolov8n"
 SOURCE = "https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/assets/bus.jpg"
 
 
@@ -17,31 +17,33 @@ def run(cmd):
 
 
 def test_special_modes():
-    run('yolo checks')
-    run('yolo settings')
-    run('yolo help')
+    run("yolo checks")
+    run("yolo settings")
+    run("yolo help")
 
 
 # Train checks ---------------------------------------------------------------------------------------------------------
 def test_train_det():
-    run(f'yolo train detect model={CFG}.yaml data=coco8.yaml imgsz=32 epochs=1')
+    run(f"yolo train detect model={CFG}.yaml data=coco8.yaml imgsz=32 epochs=1")
 
 
 def test_train_seg():
-    run(f'yolo train segment model={CFG}-seg.yaml data=coco8-seg.yaml imgsz=32 epochs=1')
+    run(
+        f"yolo train segment model={CFG}-seg.yaml data=coco8-seg.yaml imgsz=32 epochs=1"
+    )
 
 
 def test_train_cls():
-    run(f'yolo train classify model={CFG}-cls.yaml data=mnist160 imgsz=32 epochs=1')
+    run(f"yolo train classify model={CFG}-cls.yaml data=mnist160 imgsz=32 epochs=1")
 
 
 # Val checks -----------------------------------------------------------------------------------------------------------
 def test_val_detect():
-    run(f'yolo val detect model={MODEL}.pt data=coco8.yaml imgsz=32 epochs=1')
+    run(f"yolo val detect model={MODEL}.pt data=coco8.yaml imgsz=32 epochs=1")
 
 
 def test_val_segment():
-    run(f'yolo val segment model={MODEL}-seg.pt data=coco8-seg.yaml imgsz=32 epochs=1')
+    run(f"yolo val segment model={MODEL}-seg.pt data=coco8-seg.yaml imgsz=32 epochs=1")
 
 
 def test_val_classify():
@@ -63,12 +65,12 @@ def test_predict_classify():
 
 # Export checks --------------------------------------------------------------------------------------------------------
 def test_export_detect_torchscript():
-    run(f'yolo export model={MODEL}.pt format=torchscript')
+    run(f"yolo export model={MODEL}.pt format=torchscript")
 
 
 def test_export_segment_torchscript():
-    run(f'yolo export model={MODEL}-seg.pt format=torchscript')
+    run(f"yolo export model={MODEL}-seg.pt format=torchscript")
 
 
 def test_export_classify_torchscript():
-    run(f'yolo export model={MODEL}-cls.pt format=torchscript')
+    run(f"yolo export model={MODEL}-cls.pt format=torchscript")

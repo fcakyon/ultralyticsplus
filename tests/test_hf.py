@@ -13,12 +13,12 @@ hub_id = "ultralyticsplus/yolov8s"
 
 # for ultralytics < 8.0.44
 def test_load_from_hub():
-    path = download_from_hub(hub_id)
+    download_from_hub(hub_id)
 
 
 # for ultralytics >= 8.0.44
 def test_load_from_hub_yolo_8_0_44():
-    model = YOLO("keremberke/yolov8n-table-extraction")
+    YOLO("keremberke/yolov8n-table-extraction")
 
 
 def test_yolo_from_hub():
@@ -78,24 +78,30 @@ def test_detection_upload():
     from huggingface_hub.utils._errors import HfHubHTTPError
 
     # run following lines if linux and python major == 3 and python minor == 10 (python micor can be anything)
-    if platform.system() == 'Linux' and Version(platform.python_version()) >= Version("3.10"):
-        print('training started')
-        run(f'yolo train detect exist_ok=True model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1 --name={os.getcwd()}/runs/detect/train')
-        print('training ended')
-        hf_token = os.getenv('HF_TOKEN')
+    if platform.system() == "Linux" and Version(platform.python_version()) >= Version(
+        "3.10"
+    ):
+        print("training started")
+        run(
+            f"yolo train detect exist_ok=True model=yolov8n.pt data=coco8.yaml imgsz=32 epochs=1 --name={os.getcwd()}/runs/detect/train"
+        )
+        print("training ended")
+        hf_token = os.getenv("HF_TOKEN")
         if hf_token is None:
-            raise ValueError('Please set HF_TOKEN environment variable to your HuggingFace token.')
-        print('push to hub started')
+            raise ValueError(
+                "Please set HF_TOKEN environment variable to your HuggingFace token."
+            )
+        print("push to hub started")
         try:
             push_to_hfhub(
                 hf_model_id="fcakyon/yolov8n-test",
-                exp_dir='runs/detect/train',
-                hf_token=os.getenv('HF_TOKEN'),
+                exp_dir="runs/detect/train",
+                hf_token=os.getenv("HF_TOKEN"),
                 hf_private=True,
                 hf_dataset_id="fcakyon/football-detection",
-                thumbnail_text='YOLOv8s Football Detection'
+                thumbnail_text="YOLOv8s Football Detection",
             )
-            print('push to hub succeeded')
+            print("push to hub succeeded")
         except HfHubHTTPError as e:
-            print('push to hub failed')
+            print("push to hub failed")
             print(e)

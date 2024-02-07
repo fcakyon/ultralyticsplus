@@ -71,12 +71,14 @@ def add_text_to_image(
 
     # Define the coordinates of the smaller rounded rectangle
     box_margin = 20
-    x1, y1 = (pil_image.width - text_width) / 2 - box_margin, (
-        pil_image.height - text_height
-    ) / 2 - box_margin / 3
-    x2, y2 = (pil_image.width + text_width) / 2 + box_margin, (
-        pil_image.height + text_height * 2
-    ) / 2 + box_margin / 3
+    x1, y1 = (
+        (pil_image.width - text_width) / 2 - box_margin,
+        (pil_image.height - text_height) / 2 - box_margin / 3,
+    )
+    x2, y2 = (
+        (pil_image.width + text_width) / 2 + box_margin,
+        (pil_image.height + text_height * 2) / 2 + box_margin / 3,
+    )
 
     # Define the radius of the rounded corners
     radius = 15
